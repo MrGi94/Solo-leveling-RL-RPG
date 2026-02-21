@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#020208">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-512.png">
+<title>SYSTEM — Quest Log</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--void:#020208;--deep:#06060f;--pan:rgba(10,14,40,.92);--pans:#0a0e28;--sb:rgba(70,100,255,.22);--sbb:rgba(100,140,255,.45);--tx:#d0d8f0;--txb:#e8eeff;--tx2:#7080aa;--txm:#404868;--txs:#88aaff;--bl:#4466ff;--bll:#6688ff;--blp:#99aaff;--cy:#00d4ff;--gd:#ffcc00;--gdd:#aa8800;--pu:#8855ff;--rd:#ff3355;--gn:#00ff88;--fi:#ff6622;--xpg:linear-gradient(90deg,#4466ff,#6688ff,#00d4ff);--sab:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box}html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{font-family:'Rajdhani',sans-serif;background:var(--void);color:var(--tx);min-height:100dvh;overflow-x:hidden;padding-bottom:calc(64px + var(--sab))}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 79px,rgba(68,102,255,.02) 79px,rgba(68,102,255,.02) 80px),repeating-linear-gradient(90deg,transparent,transparent 79px,rgba(68,102,255,.02) 79px,rgba(68,102,255,.02) 80px);pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;inset:0;background:radial-gradient(ellipse at 30% 20%,rgba(68,102,255,.05) 0%,transparent 60%),radial-gradient(ellipse at 70% 80%,rgba(136,85,255,.03) 0%,transparent 60%);pointer-events:none;z-index:0}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(68,102,255,.3);border-radius:2px}
+.sw{position:relative;background:var(--pan);border:1px solid var(--sb);backdrop-filter:blur(16px)}
+.sw::before{content:'';position:absolute;inset:-1px;background:linear-gradient(180deg,rgba(68,102,255,.1) 0%,transparent 30%,transparent 70%,rgba(68,102,255,.05) 100%);pointer-events:none;z-index:0}
+.sw::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--bll),transparent);z-index:1}
+.sw-h{position:relative;z-index:2;display:flex;align-items:center;padding:10px 16px;border-bottom:1px solid var(--sb);background:linear-gradient(180deg,rgba(68,102,255,.05) 0%,transparent 100%)}
+.sw-t{font-family:'Orbitron',monospace;font-size:.6rem;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--txs)}
+.sw-dec{margin-left:auto;display:flex;gap:5px}.sw-dec span{width:7px;height:7px;border:1px solid var(--sbb)}.sw-dec span:last-child{background:var(--bl);border-color:var(--bl)}
+.sw-b{position:relative;z-index:2;padding:16px}
+.sc{position:absolute;inset:0;pointer-events:none;z-index:3}.sc::before,.sc::after{content:'';position:absolute;width:14px;height:14px;border-color:var(--bll);border-style:solid}.sc::before{top:-1px;left:-1px;border-width:2px 0 0 2px}.sc::after{top:-1px;right:-1px;border-width:2px 2px 0 0}.scb::before{bottom:-1px;left:-1px;top:auto;border-width:0 0 2px 2px}.scb::after{bottom:-1px;right:-1px;top:auto;border-width:0 2px 2px 0}
+.app{position:relative;z-index:1;max-width:600px;margin:0 auto;padding:12px 12px 24px}
+.hdr{text-align:center;padding:20px 0 14px}
+.hdr-al{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:5px;color:var(--bl);animation:pu 3s ease-in-out infinite}
+@keyframes pu{0%,100%{opacity:.5}50%{opacity:1}}
+.hdr-ti{font-family:'Orbitron',monospace;font-size:1.8rem;font-weight:900;letter-spacing:6px;color:var(--txb);margin-top:4px}
+/* System Voice */
+.sv{margin:10px 0;padding:14px 16px;background:linear-gradient(135deg,rgba(0,212,255,.04),rgba(68,102,255,.06));border:1px solid rgba(0,212,255,.15);position:relative;overflow:hidden;display:none}
+.sv.vis{display:block}.sv::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--cy);box-shadow:0 0 10px var(--cy)}
+.sv-tag{font-family:'Orbitron',monospace;font-size:.45rem;letter-spacing:3px;color:var(--cy);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sv-tag .bk{animation:bk 1.5s step-end infinite}@keyframes bk{0%,100%{opacity:1}50%{opacity:0}}
+.sv-msg{font-size:.86rem;color:var(--tx);line-height:1.45;font-weight:500}.sv-msg em{color:var(--cy);font-style:normal}
+.sv-x{position:absolute;top:8px;right:10px;background:none;border:none;color:var(--txm);cursor:pointer;font-size:.7rem;padding:4px}.sv-x:hover{color:var(--tx2)}
+.sv-ld{display:flex;gap:3px;align-items:center;padding:4px 0}.sv-ld .d{width:4px;height:4px;background:var(--cy);border-radius:50%;animation:ad 1.2s ease-in-out infinite}.sv-ld .d:nth-child(2){animation-delay:.2s}.sv-ld .d:nth-child(3){animation-delay:.4s}
+@keyframes ad{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+/* Player */
+.ps{margin:14px 0}.ps-g{display:flex;gap:14px;align-items:center}
+.ps-av{width:64px;height:64px;border:1px solid var(--sbb);background:rgba(68,102,255,.05);display:flex;align-items:center;justify-content:center;font-size:1.6rem;position:relative;flex-shrink:0}
+.ps-av::before{content:'';position:absolute;inset:3px;border:1px solid rgba(68,102,255,.12)}
+.ps-av .lv{position:absolute;bottom:-1px;right:-1px;font-family:'Orbitron',monospace;font-size:.5rem;font-weight:800;background:var(--bl);color:var(--void);padding:1px 5px}
+.ps-i{flex:1;min-width:0}.ps-n{font-family:'Orbitron',monospace;font-size:.85rem;font-weight:700;letter-spacing:2px;color:var(--txb)}
+.ps-r{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:2px;color:var(--gd);margin:2px 0 10px}
+.xp-t{height:14px;background:rgba(0,0,0,.5);border:1px solid var(--sb);overflow:hidden}.xp-f{height:100%;background:var(--xpg);transition:width .8s cubic-bezier(.25,.46,.45,.94)}
+.xp-mk{display:flex;justify-content:space-between;margin-top:3px}.xp-mk span{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--txm)}
+.ps-sts{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:12px}
+.ps-s{text-align:center;padding:10px 4px;background:rgba(0,0,0,.3);border:1px solid var(--sb)}
+.ps-sv{font-family:'Orbitron',monospace;font-size:1.1rem;font-weight:800}.ps-sl{font-family:'Orbitron',monospace;font-size:.4rem;letter-spacing:1.5px;color:var(--txm);margin-top:3px}
+.c-xp{color:var(--blp)}.c-st{color:var(--fi)}.c-q{color:var(--gn)}.c-lv{color:var(--gd)}
+/* Bottom Nav */
+.bn{position:fixed;bottom:0;left:0;right:0;display:flex;background:var(--pans);border-top:1px solid var(--sb);z-index:50;padding-bottom:var(--sab)}
+.bn-b{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 0;gap:3px;background:none;border:none;cursor:pointer;font-family:'Orbitron',monospace;font-size:.4rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--txm);transition:color .15s;position:relative}
+.bn-b .ic{font-size:1.1rem}.bn-b:hover,.bn-b.a{color:var(--txs)}.bn-b.a::before{content:'';position:absolute;top:0;width:40px;height:2px;background:var(--bl);box-shadow:0 0 8px var(--bl)}
+.pan{display:none}.pan.a{display:block}
+/* Epic Banner */
+.eb{position:relative;margin:10px 0;padding:16px;background:linear-gradient(135deg,rgba(136,85,255,.06),rgba(68,102,255,.06));border:1px solid rgba(136,85,255,.2);overflow:hidden}
+.eb::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pu),var(--bl),var(--pu));box-shadow:0 0 8px rgba(136,85,255,.3)}
+.eb-tg{font-family:'Orbitron',monospace;font-size:.5rem;font-weight:800;letter-spacing:4px;color:var(--gd);margin-bottom:3px}
+.eb-ti{font-family:'Orbitron',monospace;font-size:.9rem;font-weight:800;letter-spacing:2px;color:var(--txb);margin-bottom:6px}
+.eb-pr{display:flex;align-items:center;gap:10px}.eb-bar{flex:1;height:6px;background:rgba(0,0,0,.4);border:1px solid rgba(136,85,255,.15);overflow:hidden}
+.eb-fi{height:100%;background:linear-gradient(90deg,var(--pu),var(--gd));transition:width .8s}.eb-pc{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--gd)}
+.eb-info{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--tx2);margin-top:5px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px}
+/* Deadline warning */
+.dl-warn{display:inline-flex;align-items:center;gap:4px;color:var(--fi);font-weight:600}
+.dl-warn.urgent{color:var(--rd);animation:pu 1.5s ease-in-out infinite}
+/* Milestone */
+.ms-bar{display:flex;align-items:center;gap:0;margin-top:8px;position:relative;height:20px}
+.ms-line{flex:1;height:2px;background:rgba(68,102,255,.15)}.ms-line.done{background:var(--gd)}
+.ms-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--txm);background:var(--void);display:flex;align-items:center;justify-content:center;font-size:.5rem;color:transparent;z-index:1;transition:all .3s;flex-shrink:0}
+.ms-dot.hit{border-color:var(--gd);background:var(--gd);color:var(--void);box-shadow:0 0 10px rgba(255,204,0,.3)}
+.ms-dot.next{border-color:var(--bl);animation:pu 2s ease-in-out infinite}
+.ms-labels{display:flex;justify-content:space-between;font-family:'Orbitron',monospace;font-size:.35rem;letter-spacing:1px;color:var(--txm);margin-top:2px;padding:0 2px}
+/* Quest Cards */
+.ql{display:flex;flex-direction:column;gap:6px}
+.qc{position:relative;background:var(--pan);border:1px solid var(--sb);overflow:hidden;transition:all .15s}
+.qc:hover{border-color:var(--sbb)}
+.qc::before{content:'';position:absolute;top:0;left:0;width:2px;height:100%}
+.qc.q-s::before{background:var(--gd);box-shadow:0 0 8px var(--gd)}.qc.q-a::before{background:var(--pu);box-shadow:0 0 8px var(--pu)}
+.qc.q-b::before{background:var(--bll);box-shadow:0 0 8px var(--bl)}.qc.q-c::before{background:var(--gn);box-shadow:0 0 6px var(--gn)}
+.qc.q-dn{opacity:.4}
+.qc-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 6px;cursor:pointer}
+.qc-l{display:flex;align-items:center;gap:8px;min-width:0;overflow:hidden}
+.qc-bg{font-family:'Orbitron',monospace;font-size:.45rem;font-weight:800;letter-spacing:1.5px;padding:2px 8px;border:1px solid;flex-shrink:0}
+.b-s{color:var(--gd);border-color:var(--gdd)}.b-a{color:var(--pu);border-color:rgba(136,85,255,.4)}.b-b{color:var(--bll);border-color:rgba(100,136,255,.4)}.b-c{color:var(--gn);border-color:rgba(0,255,136,.3)}.b-ep{color:var(--gd);border-color:var(--gdd);background:rgba(255,204,0,.05)}
+.qc-nm{font-size:.9rem;font-weight:600;color:var(--txb);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qc-xp{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--cy);white-space:nowrap;flex-shrink:0}
+.qc-pr{display:flex;align-items:center;gap:8px;padding:2px 14px 8px}
+.qc-pt{flex:1;height:3px;background:rgba(0,0,0,.4);border:1px solid rgba(68,102,255,.08);overflow:hidden}
+.qc-pf{height:100%;background:var(--bl);transition:width .4s}
+.qc-pn{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--txm);white-space:nowrap}
+.qc-dl{font-family:'JetBrains Mono',monospace;font-size:.5rem;padding:1px 6px;border:1px solid;border-radius:2px;white-space:nowrap;margin-left:4px}
+.qc-dl.ok{color:var(--tx2);border-color:var(--sb)}.qc-dl.warn{color:var(--fi);border-color:rgba(255,102,34,.3)}.qc-dl.crit{color:var(--rd);border-color:rgba(255,51,85,.3);animation:pu 1.5s infinite}
+.qc-del{background:none;border:none;cursor:pointer;color:var(--txm);font-size:.7rem;padding:2px 5px}.qc-del:hover{color:var(--rd)}
+.qc-acts{display:flex;gap:4px;padding:0 14px 8px;flex-wrap:wrap}
+.qc-act{font-family:'Orbitron',monospace;font-size:.38rem;letter-spacing:1px;padding:4px 8px;background:none;border:1px solid var(--sb);color:var(--tx2);cursor:pointer;transition:all .1s}
+.qc-act:hover{border-color:var(--bl);color:var(--txs)}.qc-act.mod{border-color:rgba(136,85,255,.3);color:var(--pu)}.qc-act.mod:hover{border-color:var(--pu)}
+/* Phase System */
+.qc-phases{border-top:1px solid var(--sb);background:rgba(0,0,0,.1);display:none}.qc-phases.open{display:block}
+.phase{border-bottom:1px solid rgba(68,102,255,.06)}
+.phase:last-child{border-bottom:none}
+.ph-hdr{display:flex;align-items:center;gap:8px;padding:10px 14px 6px;cursor:pointer}
+.ph-gate{width:20px;height:20px;border:1px solid;display:flex;align-items:center;justify-content:center;font-size:.6rem;flex-shrink:0;transition:all .2s}
+.ph-gate.locked{border-color:var(--rd);color:var(--rd);background:rgba(255,51,85,.05)}
+.ph-gate.open{border-color:var(--gn);color:var(--gn);background:rgba(0,255,136,.05)}
+.ph-gate.done{border-color:var(--gd);color:var(--gd);background:rgba(255,204,0,.05)}
+.ph-name{font-family:'Orbitron',monospace;font-size:.5rem;font-weight:700;letter-spacing:2px;color:var(--tx2);flex:1}
+.ph-name.locked{color:var(--txm)}
+.ph-prog{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--txm)}
+.ph-objs{padding:2px 14px 8px 42px}
+.ob{display:flex;align-items:flex-start;gap:8px;padding:3px 0}
+.ob-ck{width:18px;height:18px;border:1px solid var(--sbb);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:transparent;font-size:.55rem;transition:all .12s;flex-shrink:0;margin-top:1px}
+.ob-ck:hover{border-color:var(--bl);background:rgba(68,102,255,.1)}
+.ob-ck.dn{background:var(--gn);border-color:var(--gn);color:var(--void)}
+.ob-ck.lk{border-color:var(--txm);cursor:not-allowed;opacity:.4}.ob-ck.lk:hover{border-color:var(--txm);background:transparent}
+.ob-tx{font-size:.82rem;color:var(--tx);line-height:1.3;flex:1}.ob-tx.dk{text-decoration:line-through;color:var(--txm)}.ob-tx.lk{color:var(--txm)}
+.ob-xp{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--cy);flex-shrink:0}
+.ob-tm{font-family:'JetBrains Mono',monospace;font-size:.42rem;color:var(--txm);flex-shrink:0}
+/* Section */
+.sh{display:flex;justify-content:space-between;align-items:center;margin:14px 0 8px}
+.st{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:3px;text-transform:uppercase;color:var(--txs)}
+/* Buttons */
+.btn{font-family:'Orbitron',monospace;font-size:.5rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:8px 16px;border:1px solid;cursor:pointer;transition:all .12s;background:transparent}
+.btn-p{color:var(--bll);border-color:var(--bl);background:rgba(68,102,255,.05)}.btn-p:hover{background:rgba(68,102,255,.16)}
+.btn-g{color:var(--txm);border-color:var(--sb)}.btn-g:hover{color:var(--tx2)}
+.btn-gd{color:var(--gd);border-color:var(--gdd)}.btn-gd:hover{background:rgba(255,204,0,.08)}
+.btn-cy{color:var(--cy);border-color:rgba(0,212,255,.3)}.btn-cy:hover{background:rgba(0,212,255,.06)}
+.btn-sm{padding:5px 10px;font-size:.4rem}
+/* Stats */
+.stg{display:grid;grid-template-columns:repeat(2,1fr);gap:2px;margin-bottom:16px}
+.stc{text-align:center;padding:16px 8px;background:var(--pan);border:1px solid var(--sb)}
+.stv{font-family:'Orbitron',monospace;font-size:1.4rem;font-weight:800}
+.stl{font-family:'Orbitron',monospace;font-size:.4rem;letter-spacing:2px;color:var(--txm);margin-top:4px}
+.chb{display:flex;align-items:flex-end;gap:4px;height:110px;padding:16px 12px}
+.brc{flex:1;display:flex;flex-direction:column;align-items:center;height:100%;justify-content:flex-end}
+.brv{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--txm);margin-bottom:3px}
+.brf{width:100%;min-height:2px;background:var(--xpg);transition:height .5s}.brf.td{box-shadow:0 0 10px rgba(68,102,255,.35)}
+.brd{font-family:'Orbitron',monospace;font-size:.4rem;color:var(--txm);margin-top:6px}
+/* Log */
+.ll{max-height:60vh;overflow-y:auto}.li{display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid rgba(68,102,255,.05);font-size:.78rem}
+.lic{width:24px;height:24px;display:flex;align-items:center;justify-content:center;border:1px solid var(--sb);font-size:.7rem;flex-shrink:0}
+.ltm{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--txm);white-space:nowrap}
+/* Modal */
+.mo{display:none;position:fixed;inset:0;background:rgba(2,2,8,.85);backdrop-filter:blur(4px);z-index:100;align-items:flex-end;justify-content:center}
+.mo.act{display:flex}.mw{width:100%;max-width:600px;max-height:92vh;overflow-y:auto;animation:sU .2s ease-out}
+@keyframes sU{0%{transform:translateY(30px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@media(min-width:600px){.mo{align-items:center}.mw{max-height:85vh}}
+.fg{margin-bottom:12px}.fl{font-family:'Orbitron',monospace;font-size:.45rem;letter-spacing:2px;text-transform:uppercase;color:var(--txm);margin-bottom:5px;display:block}
+.fi,.fta,.fsl{width:100%;padding:9px 12px;background:rgba(0,0,0,.4);border:1px solid var(--sb);color:var(--tx);font-family:'Rajdhani',sans-serif;font-size:.9rem;font-weight:500;transition:border-color .15s}
+.fi:focus,.fta:focus,.fsl:focus{outline:none;border-color:var(--bl);box-shadow:0 0 0 2px rgba(68,102,255,.08)}
+.fta{resize:vertical;min-height:60px}.fsl{cursor:pointer}.fsl option{background:var(--pans)}
+.fr{display:flex;gap:10px}.fr .fg{flex:1}
+.ai-s{margin-top:12px;padding:12px;background:rgba(68,102,255,.03);border:1px dashed rgba(68,102,255,.12)}
+.ai-t{font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:2px;color:var(--bll);margin-bottom:10px}
+.ai-st{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--tx2);padding:6px 0;min-height:24px}
+.ctx-t{display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer}
+.tg{width:32px;height:16px;background:rgba(0,0,0,.4);border:1px solid var(--sb);border-radius:8px;position:relative;transition:all .15s}
+.tg::after{content:'';position:absolute;top:2px;left:2px;width:10px;height:10px;background:var(--txm);border-radius:50%;transition:all .15s}
+.tg.on{background:rgba(68,102,255,.25);border-color:var(--bl)}.tg.on::after{left:18px;background:var(--bl)}
+.ma{display:flex;gap:8px;justify-content:flex-end;margin-top:16px}
+.mod-prev{margin-top:12px;padding:12px;background:rgba(0,0,0,.2);border:1px solid var(--sb);max-height:180px;overflow-y:auto;font-size:.78rem}
+.mod-add{color:var(--gn)}.mod-rem{color:var(--rd);text-decoration:line-through}.mod-chg{color:var(--gd)}
+/* Level Up */
+.lu{display:none;position:fixed;inset:0;background:rgba(2,2,8,.93);z-index:200;align-items:center;justify-content:center;flex-direction:column}.lu.act{display:flex}
+.lu-f{text-align:center;animation:lI .4s ease-out}@keyframes lI{0%{opacity:0;transform:scale(.7)}100%{opacity:1;transform:scale(1)}}
+.lu-al{font-family:'Orbitron',monospace;font-size:.55rem;letter-spacing:5px;color:var(--bl);margin-bottom:8px}
+.lu-n{font-family:'Orbitron',monospace;font-size:3rem;font-weight:900;color:var(--gd);text-shadow:0 0 30px rgba(255,204,0,.3);animation:lP 1s ease-in-out infinite alternate}
+@keyframes lP{0%{transform:scale(1)}100%{transform:scale(1.04)}}
+.lu-r{font-family:'Orbitron',monospace;font-size:.6rem;letter-spacing:3px;color:var(--blp);margin-top:6px}
+.lu-sv{font-size:.85rem;color:var(--cy);margin-top:14px;max-width:300px;text-align:center;line-height:1.4}
+/* Milestone celebration overlay */
+.ms-ov{display:none;position:fixed;inset:0;background:rgba(2,2,8,.9);z-index:200;align-items:center;justify-content:center;flex-direction:column}.ms-ov.act{display:flex}
+.ms-fr{text-align:center;animation:lI .4s ease-out}
+.ms-pct{font-family:'Orbitron',monospace;font-size:2.5rem;font-weight:900;color:var(--gd);text-shadow:0 0 30px rgba(255,204,0,.4)}
+.ms-txt{font-family:'Orbitron',monospace;font-size:.7rem;letter-spacing:4px;color:var(--blp);margin-top:8px}
+.ms-vmsg{font-size:.85rem;color:var(--cy);margin-top:14px;max-width:300px;text-align:center;line-height:1.4}
+.xpf{position:fixed;top:40%;left:50%;transform:translate(-50%,-50%);font-family:'Orbitron',monospace;font-size:1.3rem;font-weight:900;color:var(--cy);z-index:150;pointer-events:none;animation:xF 1.2s ease-out forwards;text-shadow:0 0 16px rgba(0,212,255,.4)}
+@keyframes xF{0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}15%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}30%{transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-90%) scale(.9)}}
+.nt{position:fixed;top:12px;left:50%;transform:translateX(-50%) translateY(-120%);background:var(--pans);border:1px solid var(--sbb);padding:10px 18px;z-index:60;font-family:'Orbitron',monospace;font-size:.5rem;letter-spacing:2px;color:var(--cy);transition:transform .25s ease-out;max-width:90%;text-align:center}
+.nt.show{transform:translateX(-50%) translateY(0)}
+.ptc{position:fixed;border-radius:50%;pointer-events:none;z-index:201;animation:pF 1.6s ease-out forwards}
+@keyframes pF{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(0)}}
+.ey{text-align:center;padding:32px 16px}.ey-ic{font-size:2rem;margin-bottom:8px;opacity:.5}.ey-tx{color:var(--txm);font-size:.85rem;margin-bottom:12px}
+@media(max-width:400px){.hdr-ti{font-size:1.4rem;letter-spacing:4px}.ps-av{width:52px;height:52px;font-size:1.3rem}.fr{flex-direction:column;gap:0}.qc-acts{gap:3px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hdr"><div class="hdr-al">— system notification —</div><div class="hdr-ti">QUEST LOG</div></div>
+  <div class="sv" id="svB"><div class="sv-tag">◈ SYSTEM <span class="bk">▌</span></div><div class="sv-msg" id="svM"></div><button class="sv-x" onclick="$('svB').classList.remove('vis')">✕</button></div>
+  <div class="sw ps"><div class="sc"></div><div class="sc scb"></div>
+    <div class="sw-h"><span class="sw-t">Player Status</span><div class="sw-dec"><span></span><span></span><span></span></div></div>
+    <div class="sw-b">
+      <div class="ps-g"><div class="ps-av"><span id="ava">⚔️</span><span class="lv">LV.<span id="lvN">1</span></span></div>
+        <div class="ps-i"><div class="ps-n" id="pN">HUNTER</div><div class="ps-r" id="pR">E-RANK HUNTER</div><div class="xp-t"><div class="xp-f" id="xpB" style="width:0%"></div></div><div class="xp-mk"><span id="xpC">0/100</span><span id="xpNx">100</span></div></div>
+      </div>
+      <div class="ps-sts"><div class="ps-s"><div class="ps-sv c-xp" id="sXp">0</div><div class="ps-sl">XP</div></div><div class="ps-s"><div class="ps-sv c-st">🔥<span id="sSt">0</span></div><div class="ps-sl">Streak</div></div><div class="ps-s"><div class="ps-sv c-q" id="sQ">0</div><div class="ps-sl">Clear</div></div><div class="ps-s"><div class="ps-sv c-lv" id="sLv">1</div><div class="ps-sl">Level</div></div></div>
+    </div>
+  </div>
+  <div class="pan a" id="p-q">
+    <div class="eb" id="epicB"><div class="eb-tg">✦ EPIC QUEST</div><div class="eb-ti">DOKTORAT ABSCHLIESSEN</div>
+      <div class="eb-pr"><div class="eb-bar"><div class="eb-fi" id="eFi" style="width:0%"></div></div><span class="eb-pc" id="ePc">0%</span></div>
+      <div class="eb-info"><span id="eXp"></span><span id="eDl"></span></div>
+      <div class="ms-bar" id="msBar"></div>
+      <div class="ms-labels" id="msLbl"></div>
+    </div>
+    <div class="sh"><div class="st">Active Quests</div><button class="btn btn-p btn-sm" onclick="openNew()">+ New</button></div>
+    <div class="ql" id="qL"></div>
+    <div id="dnS" style="display:none;margin-top:14px"><div class="sh"><div class="st">Cleared</div></div><div class="ql" id="dnL"></div></div>
+  </div>
+  <div class="pan" id="p-st"><div class="stg"><div class="stc"><div class="stv c-xp" id="dXp">0</div><div class="stl">Total XP</div></div><div class="stc"><div class="stv c-q" id="dCl">0</div><div class="stl">Cleared</div></div><div class="stc"><div class="stv c-st" id="dBs">0</div><div class="stl">Best Streak</div></div><div class="stc"><div class="stv c-lv" id="dLv">1</div><div class="stl">Level</div></div></div><div class="sw"><div class="sw-h"><span class="sw-t">XP This Week</span></div><div class="chb" id="wCh"></div></div></div>
+  <div class="pan" id="p-lg"><div class="sw"><div class="sw-h"><span class="sw-t">Activity Log</span></div><div class="sw-b" style="padding:0"><div class="ll" id="lgL"></div></div></div></div>
+  <div class="pan" id="p-sy"><div class="sw"><div class="sw-h"><span class="sw-t">System Config</span></div><div class="sw-b">
+    <div class="fg"><label class="fl">Hunter Name</label><input class="fi" id="cN" placeholder="Name"></div>
+    <div class="fg"><label class="fl">Anthropic API Key</label><input class="fi" id="cK" type="password" placeholder="sk-ant-..."><div id="kS" class="api-no">No key</div></div>
+    <div class="fg"><label class="fl">Epic Quest Deadline</label><input class="fi" id="cDl" type="date"></div>
+    <div class="fg"><label class="fl">Project Context</label><textarea class="fta" id="cX" rows="5" placeholder="Paste Doktorat context..."></textarea></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:12px">
+      <button class="btn btn-p btn-sm" onclick="saveCfg()">Save</button>
+      <button class="btn btn-g btn-sm" onclick="exportD()">Export</button>
+      <button class="btn btn-g btn-sm" onclick="$('impF').click()">Import</button>
+      <button class="btn btn-g btn-sm" style="color:var(--rd)" onclick="resetD()">Reset</button>
+      <input type="file" id="impF" accept=".json" style="display:none" onchange="doImp(event)">
+    </div></div></div></div>
+</div>
+<nav class="bn"><button class="bn-b a" data-p="q"><span class="ic">⚔</span>Quests</button><button class="bn-b" data-p="st"><span class="ic">◈</span>Stats</button><button class="bn-b" data-p="lg"><span class="ic">▤</span>Log</button><button class="bn-b" data-p="sy"><span class="ic">⚙</span>Sys</button></nav>
+<!-- Modals -->
+<div class="mo" id="qMo"><div class="sw mw"><div class="sc"></div><div class="sc scb"></div><div class="sw-h"><span class="sw-t">New Quest</span></div><div class="sw-b">
+  <div class="fg"><label class="fl">Objective</label><input class="fi" id="nG" placeholder="z.B. Kapitel 2 schreiben"></div>
+  <div class="fg"><label class="fl">Description</label><textarea class="fta" id="nD" rows="2"></textarea></div>
+  <div class="fr"><div class="fg"><label class="fl">Rank</label><select class="fsl" id="nR"><option value="S">S</option><option value="A" selected>A</option><option value="B">B</option><option value="C">C</option></select></div><div class="fg"><label class="fl">XP Budget</label><input class="fi" id="nB" type="number" value="500"></div><div class="fg"><label class="fl">Deadline</label><input class="fi" id="nDl" type="date"></div></div>
+  <div class="ai-s"><div class="ai-t">◈ AI Breakdown</div><div class="ctx-t" onclick="togCtx()"><div class="tg" id="ctT"></div><span style="font-size:.8rem;color:var(--tx2)">Use context</span></div>
+    <button class="btn btn-gd btn-sm" id="aiB" onclick="aiBreak()">⚡ Generate with Phases</button><div class="ai-st" id="aiS"></div></div>
+  <div class="fg" style="margin-top:12px"><label class="fl">Objectives — use === PHASE NAME === to define phases</label>
+    <textarea class="fta" id="nSt" rows="8" placeholder="=== PREPARATION ===&#10;[40] Define research questions&#10;[30] Develop search strings&#10;=== SEARCH ===&#10;[60] Run systematic search&#10;[50] Screen results"></textarea></div>
+  <div class="ma"><button class="btn btn-g" onclick="closeMo('qMo')">Cancel</button><button class="btn btn-p" onclick="createQ()">Accept</button></div>
+</div></div></div>
+<div class="mo" id="modMo"><div class="sw mw"><div class="sc"></div><div class="sc scb"></div><div class="sw-h"><span class="sw-t">Modify Quest</span></div><div class="sw-b">
+  <div class="fg"><label class="fl">Describe changes</label><textarea class="fta" id="modD" rows="3" placeholder="z.B. Betreuer will qualitative Methodik statt quantitative..."></textarea></div>
+  <button class="btn btn-cy btn-sm" id="modB" onclick="aiMod()">⚡ Analyze</button><div class="ai-st" id="modS"></div>
+  <div class="mod-prev" id="modP" style="display:none"></div>
+  <div class="ma" id="modA" style="display:none"><button class="btn btn-g" onclick="closeMo('modMo')">Cancel</button><button class="btn btn-p" onclick="applyMod()">Apply</button></div>
+  <div class="ma" id="modC"><button class="btn btn-g" onclick="closeMo('modMo')">Close</button></div>
+</div></div></div>
+<div class="lu" id="luOv"><div class="lu-f"><div class="lu-al">— level up —</div><div class="lu-n" id="luN">2</div><div class="lu-r" id="luR"></div><div class="lu-sv" id="luSv"></div></div></div>
+<div class="ms-ov" id="msOv"><div class="ms-fr"><div class="ms-pct" id="msPct"></div><div class="ms-txt" id="msTxt"></div><div class="ms-vmsg" id="msVm"></div></div></div>
+<div class="nt" id="noti"></div>
+
+<script>
+const $=id=>document.getElementById(id),esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+const RANKS=[{l:1,r:'E-RANK HUNTER',e:'⚔️'},{l:3,r:'D-RANK HUNTER',e:'🗡️'},{l:5,r:'C-RANK HUNTER',e:'🛡️'},{l:8,r:'B-RANK HUNTER',e:'⚡'},{l:12,r:'A-RANK HUNTER',e:'🔮'},{l:16,r:'S-RANK HUNTER',e:'💎'},{l:20,r:'NATIONAL-RANK',e:'🏴'},{l:25,r:'SHADOW MONARCH',e:'👑'},{l:30,r:'SOVEREIGN',e:'✦'}];
+const xpFor=l=>Math.floor(80*Math.pow(1.3,l-1)),getRank=lv=>{let r=RANKS[0];for(const x of RANKS)if(lv>=x.l)r=x;return r};
+const MILESTONES=[25,50,75,100];
+
+function defDoktorat(){const n=Date.now();const mk=(id,t,x)=>({id:n+id,text:t,xp:x,done:false,at:null});return[
+{id:n+1,goal:'Exposé fertigstellen',desc:'Forschungsexposé — kumulative Dissertation (179 Paper Tier List)',rank:'A',budget:1700,deadline:'2026-03-11',phases:[
+{name:'RECHERCHE',steps:[mk(100,'Forschungsthema & Forschungslücke präzisieren',40),mk(101,'3 Forschungsfragen (RQ1/RQ2/RQ3) formulieren',35),mk(102,'Suchstrategie definieren (Keywords, Boolean)',30),mk(103,'Datenbanken festlegen (Scopus, WoS, IEEE, ACM)',25)]},
+{name:'TIER 1 — DEFINITIONS',steps:[mk(104,'Sapkota (2025) — AI Agents vs. Agentic AI Taxonomy',30),mk(105,'Acharya (2025) — Agentic AI Survey (IEEE Access)',30),mk(106,'Hughes (2025) — Multi-Expert Analysis AI Agents',25),mk(107,'Ali & Dornaika (2025) — Architectures Survey',25),mk(108,'Wang (2023) — LLM-based Autonomous Agents',25)]},
+{name:'TIER 1 — GOVERNANCE & PAT',steps:[mk(109,'Kim E.S. (2020) — PAT applied to AI Governance',35),mk(110,'Abbott (2020) — Governor\'s Dilemma (Competence vs Control)',30),mk(111,'Voorn (2019) — Multiple Principals Problems',25),mk(112,'Kauppi (2015) — Opportunism vs. Honest Incompetence',25),mk(113,'Birkstedt (2023) — AI Governance Themes & Gaps',30),mk(114,'Papagiannidis (2025) — Responsible AI Governance Framework',30),mk(115,'Papagiannidis (2022) — AI Governance Best Practices',25)]},
+{name:'TIER 1 — HITL & AUTONOMY',steps:[mk(116,'Holzinger (2024) — Human Oversight still possible?',25),mk(117,'Mosqueira-Rey (2022) — HITL State of the Art',30),mk(118,'Christen (2023) — Meaningful Human Control reframed',25),mk(119,'Calvert (2025) — Operationalisation of MHC',25),mk(120,'Endsley (2023) — Transparency & Situation Awareness',25),mk(121,'Salloch (2024) — What Are Humans Doing in the Loop?',20)]},
+{name:'TIER 1 — TRUST & ENTERPRISE',steps:[mk(122,'Afroogh (2024) — Trust in AI Comprehensive Review',30),mk(123,'Vössing (2022) — Designing Transparency for HAI',25),mk(124,'Eulerich (2024) — RPA Governance Framework',30),mk(125,'Herm (2022) — RPA Implementation Framework',25),mk(126,'Haase (2024) — RPA and LLMs Interdisciplinary',25),mk(127,'Jöhnk (2020) — Organizational AI Readiness',25),mk(128,'Lee (2023) — AI Implementation SLR',25),mk(129,'Haipeter (2024) — Human-centered AI & Participation',20)]},
+{name:'TIER 2/3 SCREENING',steps:[mk(130,'Tier 2 (30 Paper): Intro + Conclusion + Methodik lesen',60),mk(131,'Tier 3 (74 Paper): Abstracts & Key Findings scannen',40),mk(132,'Referenzliste konsolidieren (55-65 Paper für Exposé)',25),mk(133,'Gaps prüfen: DSR Methodik, DACH/EU Regulierung, Orchestrierung',25)]},
+{name:'FRAMEWORK',steps:[mk(134,'Theoretischen Rahmen skizzieren (PAT + Socio-Technical)',45),mk(135,'Methodologie beschreiben (DSR nach Hevner)',50),mk(136,'Zeitplan für 3 Paper erstellen',25),mk(137,'3-Level Operational Definition (RPA → AI-augmented → Agentic)',35)]},
+{name:'WRITING',steps:[mk(138,'Exposé-Entwurf schreiben',70),mk(139,'Betreuer-Feedback einholen',30),mk(140,'Überarbeiten & finalisieren',50),mk(141,'Exposé einreichen',25)]}
+],created:new Date().toISOString(),completed:null,epic:true},
+{id:n+2,goal:'Paper 1: SLR — RPA vs. Agentic AI',desc:'PRISMA Systematic Literature Review',rank:'A',budget:1200,deadline:null,phases:[
+{name:'PROTOCOL',steps:[mk(200,'Review-Protokoll (PRISMA)',50),mk(201,'Forschungsfragen SLR',40),mk(202,'Suchstrings entwickeln',45)]},
+{name:'SEARCH',steps:[mk(203,'Systematische Suche durchführen',60),mk(204,'Duplikate entfernen',30),mk(205,'Titel/Abstract-Screening',70)]},
+{name:'ANALYSIS',steps:[mk(206,'Volltext-Screening',80),mk(207,'PRISMA Flow Diagram',25),mk(208,'Coding-Schema entwickeln',50),mk(209,'Datenextraktion',90),mk(210,'Qualitätsbewertung',50)]},
+{name:'SYNTHESIS',steps:[mk(211,'Thematische Synthese',70),mk(212,'Vergleichsmatrix erstellen',55),mk(213,'Ergebnisse visualisieren',40)]},
+{name:'WRITING',steps:[mk(214,'Introduction',60),mk(215,'Methodology',50),mk(216,'Results',70),mk(217,'Discussion',55),mk(218,'Conclusion',35),mk(219,'Abstract',20)]},
+{name:'SUBMISSION',steps:[mk(220,'Review & Feedback',30),mk(221,'Überarbeitung',45),mk(222,'Journal & Formatting',30),mk(223,'Einreichen',20)]}
+],created:new Date().toISOString(),completed:null,epic:true},
+{id:n+3,goal:'Paper 2: Governance Framework',desc:'Design Science Research',rank:'A',budget:1200,deadline:null,phases:[
+{name:'FOUNDATION',steps:[mk(300,'Frameworks analysieren (NIST,ISO,COBIT)',60),mk(301,'Gap-Analyse Agentic AI',50),mk(302,'DSR Methodologie definieren',45)]},
+{name:'DESIGN',steps:[mk(303,'Dimensionen identifizieren',50),mk(304,'Framework v1 entwickeln',80),mk(305,'Neuro-symbolische Architektur',55),mk(306,'Adaptive Governance Mechanismen',55)]},
+{name:'EVALUATION',steps:[mk(307,'Interview-Leitfaden erstellen',40),mk(308,'5-8 Expert:innen-Interviews',90),mk(309,'Transkribieren & codieren',70),mk(310,'Framework iterieren',60),mk(311,'Evaluationskriterien',35),mk(312,'Framework validieren',60)]},
+{name:'WRITING',steps:[mk(313,'Introduction & Background',60),mk(314,'Research Design',50),mk(315,'Framework & Results',70),mk(316,'Discussion',55),mk(317,'Conclusion & Abstract',35)]},
+{name:'SUBMISSION',steps:[mk(318,'Feedback & Überarbeitung',40),mk(319,'Einreichen',20)]}
+],created:new Date().toISOString(),completed:null,epic:true},
+{id:n+4,goal:'Paper 3: Case Studies',desc:'Empirische Validierung',rank:'A',budget:1200,deadline:null,phases:[
+{name:'DESIGN',steps:[mk(400,'Case Study Design (Yin)',45),mk(401,'Auswahlkriterien',30),mk(402,'Unternehmen kontaktieren',50),mk(403,'3-5 Unternehmen gewinnen',70)]},
+{name:'PREPARATION',steps:[mk(404,'Interview-Leitfaden',40),mk(405,'Ethik/Datenschutz',35)]},
+{name:'FIELDWORK',steps:[mk(406,'Case 1: Datenerhebung',80),mk(407,'Case 1: Analyse',60),mk(408,'Case 2: Datenerhebung',80),mk(409,'Case 2: Analyse',60),mk(410,'Case 3: Datenerhebung',80),mk(411,'Case 3: Analyse',60)]},
+{name:'CROSS-ANALYSIS',steps:[mk(412,'Cross-Case Analyse',70),mk(413,'Framework-Evaluation',55)]},
+{name:'WRITING',steps:[mk(414,'Introduction',55),mk(415,'Methodology',45),mk(416,'Findings',70),mk(417,'Discussion',55),mk(418,'Conclusion',40),mk(419,'Abstract',25)]},
+{name:'SUBMISSION',steps:[mk(420,'Feedback & Überarbeitung',40),mk(421,'Einreichen',20)]}
+],created:new Date().toISOString(),completed:null,epic:true}]}
+
+// === DATA ===
+function defs(){return{name:'HUNTER',apiKey:'',ctx:'',totalXp:0,level:1,streak:0,bestStreak:0,lastAct:null,quests:[],done:[],log:[],wXp:{mon:0,tue:0,wed:0,thu:0,fri:0,sat:0,sun:0},wStart:null,epicInit:false,epicDeadline:null,lastSv:null,milestonesHit:[]}}
+function load(){try{const d=JSON.parse(localStorage.getItem('sl_ql5'));if(d)return{...defs(),...d}}catch(e){}return defs()}
+function save(){localStorage.setItem('sl_ql5',JSON.stringify(D))}
+let D=load();
+if(!D.epicInit){D.quests=defDoktorat();D.epicInit=true;if(!D.milestonesHit)D.milestonesHit=[];save()}
+if(!D.milestonesHit)D.milestonesHit=[];
+
+// === CORE ===
+const td=()=>new Date().toISOString().split('T')[0],yd=()=>{const d=new Date();d.setDate(d.getDate()-1);return d.toISOString().split('T')[0]};
+function updStr(){const t=td();if(D.lastAct===t)return;D.streak=D.lastAct===yd()?D.streak+1:1;D.lastAct=t;if(D.streak>D.bestStreak)D.bestStreak=D.streak;save()}
+const dk=()=>['sun','mon','tue','wed','thu','fri','sat'][new Date().getDay()];
+function wkSt(){const d=new Date(),dy=d.getDay(),df=d.getDate()-dy+(dy===0?-6:1);return new Date(d.setDate(df)).toISOString().split('T')[0]}
+function rstWk(){const ws=wkSt();if(D.wStart!==ws){D.wXp={mon:0,tue:0,wed:0,thu:0,fri:0,sat:0,sun:0};D.wStart=ws;save()}}
+
+function addXp(amt,reason){
+  D.totalXp+=amt;D.wXp[dk()]=(D.wXp[dk()]||0)+amt;updStr();
+  let acc=0,nl=1;while(true){const n=xpFor(nl);if(acc+n>D.totalXp)break;acc+=n;nl++}
+  const lvd=nl>D.level;D.level=nl;addLog('xp',`+${amt} XP — ${reason}`);save();renderAll();showXpF(amt);
+  if(lvd)setTimeout(()=>showLU(nl),500);
+  checkMilestones();
+}
+
+// === PHASE LOGIC ===
+function isPhaseUnlocked(quest,phaseIdx){
+  if(phaseIdx===0)return true;
+  const prev=quest.phases[phaseIdx-1];
+  return prev.steps.every(s=>s.done);
+}
+function allSteps(q){return q.phases?q.phases.flatMap(p=>p.steps):(q.steps||[])}
+function doneSteps(q){return allSteps(q).filter(s=>s.done)}
+
+// === MILESTONES ===
+function getEpicPct(){
+  const eq=[...D.quests.filter(q=>q.epic),...D.done.filter(q=>q.epic)];
+  const ts=eq.reduce((a,q)=>a+allSteps(q).length,0);
+  const ds=eq.reduce((a,q)=>a+doneSteps(q).length,0);
+  return ts?Math.round((ds/ts)*100):0;
+}
+function checkMilestones(){
+  const pct=getEpicPct();
+  for(const ms of MILESTONES){
+    if(pct>=ms&&!D.milestonesHit.includes(ms)){
+      D.milestonesHit.push(ms);save();
+      setTimeout(()=>showMilestone(ms),800);
+      break;
+    }
+  }
+}
+function showMilestone(pct){
+  $('msPct').textContent=pct+'%';
+  $('msTxt').textContent=pct===100?'QUEST COMPLETE':'MILESTONE REACHED';
+  $('msVm').innerHTML='';$('msOv').classList.add('act');
+  triggerSV('milestone',{pct});
+  spawnParticles();
+  setTimeout(()=>$('msOv').classList.remove('act'),3500);
+}
+
+// === QUESTS ===
+function parsePhases(raw){
+  const lines=raw.split('\n').filter(l=>l.trim());
+  const phases=[];let current=null;
+  for(const line of lines){
+    const pm=line.match(/^===\s*(.+?)\s*===$/);
+    if(pm){current={name:pm[1].toUpperCase(),steps:[]};phases.push(current);continue;}
+    if(!current){current={name:'PHASE 1',steps:[]};phases.push(current);}
+    const xm=line.match(/^\[(\d+)\]\s*(.+)/);
+    const step=xm?{id:Date.now()+Math.random()*9999|0,text:xm[2].trim(),xp:parseInt(xm[1]),done:false,at:null}:{id:Date.now()+Math.random()*9999|0,text:line.trim(),xp:0,done:false,at:null};
+    current.steps.push(step);
+  }
+  return phases;
+}
+
+function createQ(){
+  const goal=$('nG').value.trim();if(!goal)return;
+  const desc=$('nD').value.trim(),rank=$('nR').value,budget=parseInt($('nB').value)||500;
+  const dl=$('nDl').value||null;const raw=$('nSt').value.trim();
+  const phases=parsePhases(raw);
+  // Distribute XP
+  const allS=phases.flatMap(p=>p.steps);
+  const wx=allS.filter(s=>s.xp>0),wo=allS.filter(s=>s.xp===0);
+  const used=wx.reduce((a,s)=>a+s.xp,0),rem=Math.max(0,budget-used),per=wo.length?Math.floor(rem/wo.length):0;
+  wo.forEach((s,i)=>{s.xp=per+(i===0?rem-per*wo.length:0)});
+  D.quests.push({id:Date.now(),goal,desc,rank,budget,deadline:dl,phases,created:new Date().toISOString(),completed:null,epic:false});
+  addLog('quest',`New Quest: "${goal}"`);save();closeMo('qMo');renderAll();notify('Quest accepted');triggerSV('new_quest',{goal});
+}
+
+function togStep(qid,phIdx,sIdx){
+  const q=D.quests.find(x=>x.id===qid);if(!q)return;
+  if(!isPhaseUnlocked(q,phIdx))return;
+  const s=q.phases[phIdx].steps[sIdx];if(!s||s.done)return;
+  s.done=true;s.at=new Date().toISOString();
+  addXp(s.xp,s.text);
+  const allD=allSteps(q).every(x=>x.done);
+  if(allD)compQ(qid);
+  else{const rem=allSteps(q).filter(x=>!x.done).length;triggerSV('step_done',{quest:q.goal,step:s.text,remaining:rem})}
+}
+
+function compQ(qid){
+  const i=D.quests.findIndex(x=>x.id===qid);if(i===-1)return;
+  const q=D.quests.splice(i,1)[0];q.completed=new Date().toISOString();D.done.push(q);
+  addLog('quest',`✦ Cleared: "${q.goal}"`);save();renderAll();notify('Quest cleared!');triggerSV('quest_done',{goal:q.goal});
+}
+let delPend=null,delTimer2=null;
+function delQ(qid){if(delPend===qid){delPend=null;D.quests=D.quests.filter(x=>x.id!==qid);save();renderAll();return}delPend=qid;notify('Tap delete again to confirm');if(delTimer2)clearTimeout(delTimer2);delTimer2=setTimeout(()=>{delPend=null},3000)}
+
+// === DEADLINES ===
+function daysUntil(dateStr){if(!dateStr)return null;const diff=Math.ceil((new Date(dateStr)-new Date())/(1000*60*60*24));return diff}
+
+// === SYSTEM VOICE ===
+let svTo=null;
+async function triggerSV(ev,data={}){
+  if(!D.apiKey)return;if(D.lastSv&&Date.now()-D.lastSv<25000)return;D.lastSv=Date.now();
+  $('svB').classList.add('vis');$('svM').innerHTML='<div class="sv-ld"><span class="d"></span><span class="d"></span><span class="d"></span></div>';
+  const state=buildCtx();
+  const prompts={
+    new_quest:`Hunter accepted quest: "${data.goal}". Brief motivating system message (1-2 sentences).`,
+    step_done:`Hunter completed: "${data.step}" in "${data.quest}". ${data.remaining} left. Brief status (1-2 sentences). Mention next step if relevant.`,
+    quest_done:`Hunter cleared: "${data.goal}"! Triumphant message (1-2 sentences).`,
+    level_up:`Hunter reached Level ${data.level} (${data.rank}). Epic message (1-2 sentences).`,
+    milestone:`Hunter reached ${data.pct}% of the Epic Quest! ${data.pct===100?'THE DOCTORAL QUEST IS COMPLETE.':'Celebrate this milestone.'} (2-3 sentences).`,
+    session_start:`Hunter opened app. State:\n${state}\nBrief status + recommend next objective (2-3 sentences). If deadline is approaching, warn.`,
+    streak_lost:`Hunter lost their streak. Stern motivation (1-2 sentences).`
+  };
+  const sys=`You are the SYSTEM from Solo Leveling. English only. Authoritative, concise, enigmatic. Address user as "Hunter". Use em-dashes. No emojis. HTML <em> for emphasis. MAX 3 sentences.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':D.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:200,system:sys,messages:[{role:'user',content:prompts[ev]||prompts.session_start}]})});
+    if(!res.ok)throw 0;const d=await res.json();$('svM').innerHTML=d.content.map(b=>b.text||'').join('').trim();
+    if(svTo)clearTimeout(svTo);svTo=setTimeout(()=>$('svB').classList.remove('vis'),15000);
+  }catch(e){$('svB').classList.remove('vis')}
+}
+
+function buildCtx(){
+  const eq=D.quests.filter(q=>q.epic);
+  let c=`Lv${D.level}|XP:${D.totalXp}|Streak:${D.streak}d|Epic:${getEpicPct()}%`;
+  if(D.epicDeadline){const dl=daysUntil(D.epicDeadline);if(dl!==null)c+=`|Deadline:${dl}d`}
+  c+='\n';
+  eq.forEach(q=>{const d=doneSteps(q).length,t=allSteps(q).length;const nx=allSteps(q).find(s=>!s.done);
+    const curPh=q.phases.findIndex(p=>p.steps.some(s=>!s.done));
+    c+=`"${q.goal}":${d}/${t} Phase:${curPh>=0?q.phases[curPh].name:'DONE'}${nx?' Next:"'+nx.text+'"':''}\n`});
+  return c;
+}
+
+// === AI BREAKDOWN ===
+let useCtx=false;
+function togCtx(){useCtx=!useCtx;$('ctT').classList.toggle('on',useCtx)}
+async function aiBreak(){
+  const goal=$('nG').value.trim();if(!goal){$('aiS').textContent='Enter objective.';return}
+  if(!D.apiKey){$('aiS').innerHTML='<span style="color:var(--rd)">No API key.</span>';return}
+  $('aiS').innerHTML='<div class="sv-ld"><span class="d"></span><span class="d"></span><span class="d"></span></div>';$('aiB').disabled=true;
+  const desc=$('nD').value.trim(),budget=parseInt($('nB').value)||500;
+  let ctx='';if(useCtx&&D.ctx)ctx=`\nContext:\n${D.ctx.substring(0,800)}`;
+  const prompt=`Break this goal into PHASES with objectives. Format:
+=== PHASE NAME ===
+[XP] objective text
+
+Total XP ≈ ${budget}. XP 15-100 per step. 3-6 phases, 2-6 steps each. German. Be specific.${ctx}\n\nGoal: ${goal}${desc?'\n'+desc:''}`;
+  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':D.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1200,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)throw 0;const d=await res.json();$('nSt').value=d.content.map(b=>b.text||'').join('\n').trim();$('aiS').innerHTML='<span style="color:var(--gn)">✦ Generated.</span>';
+  }catch(e){$('aiS').innerHTML='<span style="color:var(--rd)">Error</span>'}$('aiB').disabled=false;
+}
+
+// === QUEST MODIFICATION ===
+let modQid=null,pendMod=null;
+function openMod(qid){modQid=qid;$('modD').value='';$('modS').innerHTML='';$('modP').style.display='none';$('modA').style.display='none';$('modC').style.display='flex';$('modMo').classList.add('act')}
+async function aiMod(){
+  if(!D.apiKey){$('modS').innerHTML='<span style="color:var(--rd)">No API key.</span>';return}
+  const desc=$('modD').value.trim();if(!desc){$('modS').textContent='Describe changes.';return}
+  const q=D.quests.find(x=>x.id===modQid);if(!q)return;
+  $('modS').innerHTML='<div class="sv-ld"><span class="d"></span><span class="d"></span><span class="d"></span></div>';$('modB').disabled=true;
+  const qj=JSON.stringify(q.phases.map((p,pi)=>({phase:p.name,steps:p.steps.map((s,si)=>({pi,si,text:s.text,xp:s.xp,done:s.done}))})));
+  const prompt=`Modify quest "${q.goal}". Current phases:\n${qj}\n\nChanges: "${desc}"\n\nRespond ONLY valid JSON:\n{"add":[{"phase_index":1,"text":"step","xp":30}],"remove":[{"pi":0,"si":2}],"modify":[{"pi":1,"si":0,"text":"new text","xp":40}],"new_phases":[{"after_phase":1,"name":"NAME","steps":[{"text":"step","xp":30}]}]}\nOnly change non-done steps. Minimal changes. German text.`;
+  try{const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':D.apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})});
+    if(!res.ok)throw 0;const d=await res.json();const txt=d.content.map(b=>b.text||'').join('').replace(/```json|```/g,'').trim();
+    pendMod=JSON.parse(txt);renderModPrev(q);$('modS').innerHTML='<span style="color:var(--gn)">✦ Ready.</span>';$('modA').style.display='flex';$('modC').style.display='none';
+  }catch(e){$('modS').innerHTML='<span style="color:var(--rd)">Error parsing</span>'}$('modB').disabled=false;
+}
+function renderModPrev(q){const p=$('modP');p.style.display='block';let h='';
+  if(pendMod.remove)pendMod.remove.forEach(r=>{const s=q.phases[r.pi]?.steps[r.si];if(s&&!s.done)h+=`<div class="mod-rem">— ${esc(s.text)}</div>`});
+  if(pendMod.modify)pendMod.modify.forEach(m=>{h+=`<div class="mod-chg">↻ ${esc(m.text)} [${m.xp}XP]</div>`});
+  if(pendMod.add)pendMod.add.forEach(a=>{h+=`<div class="mod-add">+ ${esc(a.text)} [${a.xp}XP]</div>`});
+  if(pendMod.new_phases)pendMod.new_phases.forEach(np=>{h+=`<div class="mod-add">+ Phase: ${esc(np.name)}</div>`;np.steps.forEach(s=>{h+=`<div class="mod-add">&nbsp;&nbsp;+ ${esc(s.text)} [${s.xp}XP]</div>`})});
+  p.innerHTML=h||'No changes.'}
+function applyMod(){const q=D.quests.find(x=>x.id===modQid);if(!q||!pendMod)return;
+  if(pendMod.modify)pendMod.modify.forEach(m=>{const s=q.phases[m.pi]?.steps[m.si];if(s&&!s.done){s.text=m.text;s.xp=m.xp}});
+  if(pendMod.remove){const sorted=[...pendMod.remove].sort((a,b)=>b.pi-a.pi||b.si-a.si);sorted.forEach(r=>{const s=q.phases[r.pi]?.steps[r.si];if(s&&!s.done)q.phases[r.pi].steps.splice(r.si,1)})}
+  if(pendMod.add)pendMod.add.forEach(a=>{const ph=q.phases[a.phase_index];if(ph)ph.steps.push({id:Date.now()+Math.random()*9999|0,text:a.text,xp:a.xp,done:false,at:null})});
+  if(pendMod.new_phases)pendMod.new_phases.forEach(np=>{const steps=np.steps.map(s=>({id:Date.now()+Math.random()*9999|0,text:s.text,xp:s.xp,done:false,at:null}));const idx=Math.min((np.after_phase||0)+1,q.phases.length);q.phases.splice(idx,0,{name:np.name,steps})});
+  pendMod=null;addLog('quest',`Modified: "${q.goal}"`);save();closeMo('modMo');renderAll();notify('Modified')}
+
+// === LOG ===
+function addLog(t,tx){D.log.unshift({t,tx,tm:new Date().toISOString()});if(D.log.length>200)D.log.length=200;save()}
+
+// === SETTINGS ===
+function saveCfg(){D.name=$('cN').value.trim()||'HUNTER';D.apiKey=$('cK').value.trim();D.ctx=$('cX').value.trim();D.epicDeadline=$('cDl').value||null;save();renderAll();notify('Saved')}
+function exportD(){const b=new Blob([JSON.stringify(D,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='questlog_v5.json';a.click()}
+function doImp(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{try{D={...defs(),...JSON.parse(ev.target.result)};save();renderAll();notify('Imported')}catch(e){notify('Failed')}};r.readAsText(f)}
+let resetCount=0,resetTimer=null;
+function resetD(){resetCount++;if(resetCount===1){notify('Tap Reset again to confirm');if(resetTimer)clearTimeout(resetTimer);resetTimer=setTimeout(()=>{resetCount=0},3000);return}resetCount=0;localStorage.removeItem('sl_ql5');D=defs();D.quests=defDoktorat();D.epicInit=true;save();renderAll();notify('System reset complete')}
+
+// === RENDER ===
+const openQs=new Set(),openPh=new Set();
+function renderAll(){rstWk();rPlayer();rEpic();rQuests();rStats();rChart();rLog();rCfg()}
+
+function rPlayer(){const lv=D.level;let acc=0;for(let i=1;i<lv;i++)acc+=xpFor(i);const iL=D.totalXp-acc,nd=xpFor(lv),pc=Math.min(100,(iL/nd)*100);
+  $('lvN').textContent=lv;$('xpB').style.width=pc+'%';$('xpC').textContent=`${iL}/${nd} XP`;$('xpNx').textContent=`${nd-iL} to next`;
+  $('sXp').textContent=D.totalXp.toLocaleString();$('sSt').textContent=D.streak;$('sQ').textContent=D.done.length;$('sLv').textContent=lv;
+  $('pN').textContent=D.name.toUpperCase();const rk=getRank(lv);$('pR').textContent=rk.r;$('ava').textContent=rk.e}
+
+function rEpic(){
+  const eq=[...D.quests.filter(q=>q.epic),...D.done.filter(q=>q.epic)];
+  const ts=eq.reduce((a,q)=>a+allSteps(q).length,0),ds=eq.reduce((a,q)=>a+doneSteps(q).length,0);
+  const txp=eq.reduce((a,q)=>a+allSteps(q).reduce((b,s)=>b+s.xp,0),0);
+  const exp=eq.reduce((a,q)=>a+doneSteps(q).reduce((b,s)=>b+s.xp,0),0);
+  const pc=ts?Math.round((ds/ts)*100):0;
+  $('eFi').style.width=pc+'%';$('ePc').textContent=pc+'%';
+  $('eXp').textContent=`${exp.toLocaleString()}/${txp.toLocaleString()} XP · ${ds}/${ts}`;
+  // Deadline
+  const dl=daysUntil(D.epicDeadline);
+  if(dl!==null){const cls=dl<30?'urgent':dl<90?'':' ';$('eDl').innerHTML=`<span class="dl-warn ${dl<30?'urgent':''}">${dl}d remaining</span>`}else $('eDl').textContent='';
+  // Milestones bar
+  const ms=[25,50,75,100];
+  let mh='',ml='';
+  ms.forEach((m,i)=>{
+    const hit=pc>=m;const isNext=!hit&&(i===0||pc>=ms[i-1]);
+    mh+=`${i>0?`<div class="ms-line ${pc>=m?'done':''}"></div>`:''}`;
+    mh+=`<div class="ms-dot ${hit?'hit':isNext?'next':''}">${hit?'✓':''}</div>`;
+    ml+=`<span>${m}%</span>`;
+  });
+  $('msBar').innerHTML=mh;$('msLbl').innerHTML=ml;
+}
+
+function rQuests(){
+  const el=$('qL');if(!D.quests.length){el.innerHTML='<div class="ey"><div class="ey-ic">✦</div><div class="ey-tx">All quests cleared!</div></div>';$('dnS').style.display='none';return}
+  el.innerHTML=D.quests.map(q=>{
+    const as=allSteps(q),dn=doneSteps(q).length,tot=as.length,pc=tot?(dn/tot)*100:0;
+    const rc={S:'q-s',A:'q-a',B:'q-b',C:'q-c'}[q.rank]||'q-b';
+    const bg=q.epic?'b-ep':({S:'b-s',A:'b-a',B:'b-b',C:'b-c'}[q.rank]||'b-b');
+    const bt=q.epic?(q.rank==='B'?'STD':'MAJOR'):q.rank;
+    const txp=as.reduce((a,s)=>a+s.xp,0);const isO=openQs.has(q.id);
+    const dl=daysUntil(q.deadline);
+    let dlHtml='';if(dl!==null){const c=dl<7?'crit':dl<30?'warn':'ok';dlHtml=`<span class="qc-dl ${c}">${dl}d</span>`}
+    return`<div class="qc ${rc}">
+      <div class="qc-top" onclick="tgQ(${q.id})"><div class="qc-l"><span class="qc-bg ${bg}">${bt}</span><span class="qc-nm">${esc(q.goal)}</span></div><span class="qc-xp">${txp}XP${dlHtml}</span></div>
+      <div class="qc-pr"><div class="qc-pt"><div class="qc-pf" style="width:${pc}%"></div></div><span class="qc-pn">${dn}/${tot}</span>${!q.epic?`<button class="qc-del" onclick="delQ(${q.id})">✕</button>`:''}</div>
+      <div class="qc-acts"><button class="qc-act" onclick="tgQ(${q.id})">${isO?'▾ HIDE':'▸ PHASES'}</button>${D.apiKey?`<button class="qc-act mod" onclick="openMod(${q.id})">⚡ MODIFY</button>`:''}</div>
+      <div class="qc-phases ${isO?'open':''}" id="ph-${q.id}">
+        ${q.phases.map((p,pi)=>{const unlocked=isPhaseUnlocked(q,pi);const pDone=p.steps.every(s=>s.done);const pdn=p.steps.filter(s=>s.done).length;
+          const gateC=pDone?'done':unlocked?'open':'locked';const gateI=pDone?'✓':unlocked?'▸':'🔒';
+          return`<div class="phase"><div class="ph-hdr" onclick="tgPh(${q.id},${pi})"><div class="ph-gate ${gateC}">${gateI}</div><span class="ph-name ${unlocked?'':'locked'}">${esc(p.name)}</span><span class="ph-prog">${pdn}/${p.steps.length}</span></div>
+            <div class="ph-objs" id="pho-${q.id}-${pi}" style="display:${openPh.has(q.id+'-'+pi)?'block':'none'}">
+              ${p.steps.map((s,si)=>{const lk=!unlocked&&!s.done;const tm=s.at?new Date(s.at).toLocaleDateString('de',{day:'2-digit',month:'2-digit'}):'';
+                return`<div class="ob"><button class="ob-ck ${s.done?'dn':lk?'lk':''}" onclick="${s.done||lk?'':`togStep(${q.id},${pi},${si})`}">${s.done?'✓':lk?'🔒':''}</button><span class="ob-tx ${s.done?'dk':lk?'lk':''}">${esc(s.text)}</span><span class="ob-xp">${s.xp}</span>${tm?`<span class="ob-tm">${tm}</span>`:''}</div>`}).join('')}
+            </div></div>`}).join('')}
+      </div></div>`}).join('');
+  const ds=$('dnS'),dl=$('dnL');
+  if(D.done.length){ds.style.display='block';dl.innerHTML=D.done.slice().reverse().slice(0,8).map(q=>{const bg={S:'b-s',A:'b-a',B:'b-b',C:'b-c'}[q.rank]||'b-b';const txp=allSteps(q).reduce((a,s)=>a+s.xp,0);const dt=q.completed?new Date(q.completed).toLocaleDateString('de'):'';return`<div class="qc q-dn"><div class="qc-top"><div class="qc-l"><span class="qc-bg ${bg}">${q.rank}</span><span class="qc-nm">✦ ${esc(q.goal)}</span></div><span class="qc-xp">${txp}XP${dt?' · '+dt:''}</span></div></div>`}).join('')}else ds.style.display='none'}
+
+function tgQ(id){openQs.has(id)?openQs.delete(id):openQs.add(id);rQuests()}
+function tgPh(qid,pi){const k=qid+'-'+pi;openPh.has(k)?openPh.delete(k):openPh.add(k);const el=$(`pho-${qid}-${pi}`);if(el)el.style.display=el.style.display==='none'?'block':'none'}
+
+function rStats(){$('dXp').textContent=D.totalXp.toLocaleString();$('dCl').textContent=D.done.length;$('dBs').textContent=D.bestStreak;$('dLv').textContent=D.level}
+function rChart(){const ks=['mon','tue','wed','thu','fri','sat','sun'],ls=['MO','DI','MI','DO','FR','SA','SO'],d=dk();const vs=ks.map(k=>D.wXp[k]||0),mx=Math.max(...vs,10);$('wCh').innerHTML=ks.map((k,i)=>`<div class="brc"><div class="brv">${vs[i]}</div><div class="brf ${k===d?'td':''}" style="height:${Math.max(2,(vs[i]/mx)*90)}px"></div><div class="brd">${ls[i]}</div></div>`).join('')}
+function rLog(){const el=$('lgL');if(!D.log.length){el.innerHTML='<div class="ey"><div class="ey-tx">No activity.</div></div>';return}const ic={xp:'✦',quest:'⚔',streak:'🔥',level:'👑'};el.innerHTML=D.log.slice(0,80).map(l=>{const d=new Date(l.tm),t=d.toLocaleDateString('de')+' '+d.toLocaleTimeString('de',{hour:'2-digit',minute:'2-digit'});return`<div class="li"><div class="lic">${ic[l.t]||'◈'}</div><span>${esc(l.tx)}</span><span class="ltm">${t}</span></div>`}).join('')}
+function rCfg(){$('cN').value=D.name;$('cK').value=D.apiKey||'';$('kS').textContent=D.apiKey?'✓ Key set':'No key';$('kS').className=D.apiKey?'api-ok':'api-no';$('cX').value=D.ctx||'';$('cDl').value=D.epicDeadline||''}
+
+// === UI ===
+function openNew(){$('qMo').classList.add('act');['nG','nD','nSt'].forEach(id=>$(id).value='');$('nB').value='500';$('nR').value='A';$('nDl').value='';$('aiS').innerHTML='';setTimeout(()=>$('nG').focus(),100)}
+function closeMo(id){$(id).classList.remove('act')}
+$('qMo').addEventListener('click',e=>{if(e.target.id==='qMo')closeMo('qMo')});
+$('modMo').addEventListener('click',e=>{if(e.target.id==='modMo')closeMo('modMo')});
+document.querySelectorAll('.bn-b').forEach(b=>{b.addEventListener('click',()=>{document.querySelectorAll('.bn-b').forEach(x=>x.classList.remove('a'));document.querySelectorAll('.pan').forEach(x=>x.classList.remove('a'));b.classList.add('a');$('p-'+b.dataset.p).classList.add('a')})});
+function notify(m){const n=$('noti');n.textContent=m;n.classList.add('show');setTimeout(()=>n.classList.remove('show'),2200)}
+function showXpF(a){const e=document.createElement('div');e.className='xpf';e.textContent=`+${a} XP`;document.body.appendChild(e);setTimeout(()=>e.remove(),1300)}
+function spawnParticles(){for(let i=0;i<30;i++){setTimeout(()=>{const p=document.createElement('div');p.className='ptc';p.style.left=(30+Math.random()*40)+'%';p.style.top=(30+Math.random()*40)+'%';p.style.width=(3+Math.random()*6)+'px';p.style.height=p.style.width;p.style.background=['#ffcc00','#4466ff','#00d4ff','#8855ff','#ff6622'][Math.floor(Math.random()*5)];p.style.setProperty('--dx',(Math.random()*180-90)+'px');p.style.setProperty('--dy',(-60-Math.random()*140)+'px');document.body.appendChild(p);setTimeout(()=>p.remove(),1600)},i*40)}}
+function showLU(lv){const rk=getRank(lv);$('luN').textContent=lv;$('luR').textContent=rk.r;$('luSv').innerHTML='';$('luOv').classList.add('act');addLog('level',`Level Up → ${lv} (${rk.r})`);triggerSV('level_up',{level:lv,rank:rk.r});spawnParticles();setTimeout(()=>$('luOv').classList.remove('act'),2800)}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeMo('qMo');closeMo('modMo')}});
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+renderAll();setTimeout(()=>triggerSV('session_start'),1500);
+</script>
+</body>
+</html>
